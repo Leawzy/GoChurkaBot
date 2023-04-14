@@ -1,24 +1,24 @@
 package main
 
 import (
-	_ "fmt"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"math/rand"
 	"time"
+
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func main() {
-	// Create a new bot instance
-	bot, err := tgbotapi.NewBotAPI(Token)
+	// Создаем новый экземпляр бота
+	bot, err := tgbotapi.NewBotAPI("YOUR_BOT_TOKEN")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Update the random seed
+	// Обновляем seed для генерации случайных чисел
 	rand.Seed(time.Now().UnixNano())
 
-	// Set up a message handler for voice messages
+	// Устанавливаем обработчик сообщений с типом "voice"
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 60
 
@@ -33,17 +33,19 @@ func main() {
 		}
 
 		if update.Message.Voice != nil {
-			// Generate a random offensive message
+			// Генерируем случайное оскорбительное сообщение
 			messages := []string{"Даун", "Соси яйца мои", "чурка тупая", "ебло тупое", "кучерявое ебло тупое", "кучерявое ебло", "уебан", "уебан тысячного ранга блять", "попуск", "попуск ебанный", "Нефор ебаный"}
 			response := messages[rand.Intn(len(messages))]
 
-			// Reply with the generated message
+			// Создаем новое сообщение в ответ на исходное сообщение
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, err = bot.Send(msg)
-			if err != nil {
-				log.Println(err)
-			}
+			msg.ReplyToMessageID = update.Message.MessageID // Устанавливаем исходное сообщение в качестве родительского
+			go func() {
+				_, err = bot.Send(msg)
+				if err != nil {
+					log.Println(err)
+				}
+			}()
 		}
 	}
 }
